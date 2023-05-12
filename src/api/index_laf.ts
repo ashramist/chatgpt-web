@@ -2,7 +2,7 @@ import { Cloud } from 'laf-client-sdk'
 import { useAuthStoreWithout } from '@/store/modules/auth'
 import { encrypt } from '@/utils/crypto/index'
 const cloud = new Cloud({
-  baseUrl: process.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
+  baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
   getAccessToken: () => '', // 这里不需要授权，先填空
   headers: {
     token: useAuthStoreWithout().token || '',
@@ -59,5 +59,12 @@ export function fetchHistoryLogList() {
  * @param prompt 客户端发送的聊天内容
  */
 export function doChat(params = { prompt: '', parentMessageId: '', conversationId: '' }) {
-  return cloud.invokeFunction('proxy', { ...params, fc: encrypt('chat') })
+  const coludWithToken = new Cloud({
+    baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
+    getAccessToken: () => '', // 这里不需要授权，先填空
+    headers: {
+      token: useAuthStoreWithout().token || '',
+    },
+  })
+  return coludWithToken.invokeFunction('proxy', { ...params, fc: encrypt('chat') })
 }

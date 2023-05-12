@@ -108,7 +108,7 @@ const rules: FormRules = {
     },
     {
       validator(rule: FormItemRule, value: string): boolean {
-        return value.trim() !== modelRef.value.password.trim()
+        return value.trim() === modelRef.value.password.trim()
       },
       message: t('error.password.repeat'),
       trigger: ['input'],
