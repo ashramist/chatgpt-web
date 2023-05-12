@@ -1,80 +1,83 @@
 <script setup lang='ts'>
-import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
+import type { Ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import { storeToRefs } from "pinia";
 import {
   NAutoComplete,
   NButton,
   NInput,
   useDialog,
   useMessage,
-} from 'naive-ui'
-import html2canvas from 'html2canvas'
-import { Message } from './components'
-import { useScroll } from './hooks/useScroll'
-import { useChat } from './hooks/useChat'
-import { useCopyCode } from './hooks/useCopyCode'
-import { useUsingContext } from './hooks/useUsingContext'
-import HeaderComponent from './components/Header/index.vue'
-import { HoverButton, SvgIcon } from '@/components/common'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useChatStore, usePromptStore } from '@/store'
-import { t } from '@/locales'
-import { doChat } from '@/api/index_laf'
+} from "naive-ui";
+import html2canvas from "html2canvas";
+import { Message } from "./components";
+import { useScroll } from "./hooks/useScroll";
+import { useChat } from "./hooks/useChat";
+import { useCopyCode } from "./hooks/useCopyCode";
+import { useUsingContext } from "./hooks/useUsingContext";
+import HeaderComponent from "./components/Header/index.vue";
+import { HoverButton, SvgIcon } from "@/components/common";
+import { useBasicLayout } from "@/hooks/useBasicLayout";
+import { useChatStore, usePromptStore } from "@/store";
+import { t } from "@/locales";
+import { doChat } from "@/api/index_laf";
 
-let controller = new AbortController()
+let controller = new AbortController();
 
-const route = useRoute()
-const dialog = useDialog()
-const ms = useMessage()
+const route = useRoute();
+const dialog = useDialog();
+const ms = useMessage();
 
-const chatStore = useChatStore()
+const chatStore = useChatStore();
 
-useCopyCode()
+useCopyCode();
 
-const { isMobile } = useBasicLayout()
-const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex }
-  = useChat()
-const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
-const { usingContext, toggleUsingContext } = useUsingContext()
+const { isMobile } = useBasicLayout();
+const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } =
+  useChat();
+const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll();
+const { usingContext, toggleUsingContext } = useUsingContext();
 
-const { uuid } = route.params as { uuid: string }
+const { uuid } = route.params as { uuid: string };
 
-const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
+const dataSources = computed(() => chatStore.getChatByUuid(+uuid));
 const conversationList = computed(() =>
-  dataSources.value.filter(item => !item.inversion && !item.error),
-)
+  dataSources.value.filter((item) => !item.inversion && !item.error)
+);
 
-const prompt = ref<string>('')
-const loading = ref<boolean>(false)
-const inputRef = ref<Ref | null>(null)
+const prompt = ref<string>("");
+const loading = ref<boolean>(false);
+const inputRef = ref<Ref | null>(null);
 
 // 添加PromptStore
-const promptStore = usePromptStore()
+const promptStore = usePromptStore();
 
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
-const { promptList: promptTemplate } = storeToRefs<any>(promptStore)
+const { promptList: promptTemplate } = storeToRefs<any>(promptStore);
 
 // 未知原因刷新页面，loading 状态不会重置，手动重置
 dataSources.value.forEach((item, index) => {
-  if (item.loading)
-    updateChatSome(+uuid, index, { loading: false })
-})
+  if (item.loading) updateChatSome(+uuid, index, { loading: false });
+});
 
 function handleSubmit() {
-  onConversation()
+  onConversation();
 }
 
 const fetchChatAPIOnce = async (
   message: string,
-  options: Chat.ConversationRequest,
+  options: Chat.ConversationRequest
 ) => {
-  const { ok, data } = await doChat({
+  const {
+    ok,
+    data,
+    message: msg,
+  } = await doChat({
     prompt: message,
-    parentMessageId: options.parentMessageId || '',
-    conversationId: options.conversationId || '',
-  })
+    parentMessageId: options.parentMessageId || "",
+    conversationId: options.conversationId || "",
+  });
   if (ok) {
     updateChat(+uuid, dataSources.value.length - 1, {
       dateTime: new Date().toLocaleString(),
@@ -87,21 +90,25 @@ const fetchChatAPIOnce = async (
         parentMessageId: data.id,
       },
       requestOptions: { prompt: message, options: { ...options } },
-    })
+    });
+  } else {
+    updateChatSome(+uuid, dataSources.value.length - 1, {
+      text: `${message}\n[${msg}]`,
+      error: false,
+      loading: false,
+    });
   }
-  updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
-}
+  updateChatSome(+uuid, dataSources.value.length - 1, { loading: false });
+};
 
 async function onConversation() {
-  const message = prompt.value
+  const message = prompt.value;
 
-  if (loading.value)
-    return
+  if (loading.value) return;
 
-  if (!message || message.trim() === '')
-    return
+  if (!message || message.trim() === "") return;
 
-  controller = new AbortController()
+  controller = new AbortController();
 
   addChat(+uuid, {
     dateTime: new Date().toLocaleString(),
@@ -110,57 +117,55 @@ async function onConversation() {
     error: false,
     conversationOptions: null,
     requestOptions: { prompt: message, options: null },
-  })
-  scrollToBottom()
+  });
+  scrollToBottom();
 
-  loading.value = true
-  prompt.value = ''
+  loading.value = true;
+  prompt.value = "";
 
-  let options: Chat.ConversationRequest = {}
-  const lastContext
-    = conversationList.value[conversationList.value.length - 1]
-      ?.conversationOptions
+  let options: Chat.ConversationRequest = {};
+  const lastContext =
+    conversationList.value[conversationList.value.length - 1]
+      ?.conversationOptions;
 
-  if (lastContext && usingContext.value)
-    options = { ...lastContext }
+  if (lastContext && usingContext.value) options = { ...lastContext };
 
   addChat(+uuid, {
     dateTime: new Date().toLocaleString(),
-    text: '',
+    text: "",
     loading: true,
     inversion: false,
     error: false,
     conversationOptions: null,
     requestOptions: { prompt: message, options: { ...options } },
-  })
-  scrollToBottom()
+  });
+  scrollToBottom();
 
   try {
-    await fetchChatAPIOnce(message, options)
-  }
-  catch (error: any) {
-    const errorMessage = error?.message ?? t('common.wrong')
+    await fetchChatAPIOnce(message, options);
+  } catch (error: any) {
+    const errorMessage = error?.message ?? t("common.wrong");
 
-    if (error.message === 'canceled') {
+    if (error.message === "canceled") {
       updateChatSome(+uuid, dataSources.value.length - 1, {
         loading: false,
-      })
-      scrollToBottomIfAtBottom()
-      return
+      });
+      scrollToBottomIfAtBottom();
+      return;
     }
 
     const currentChat = getChatByUuidAndIndex(
       +uuid,
-      dataSources.value.length - 1,
-    )
+      dataSources.value.length - 1
+    );
 
-    if (currentChat?.text && currentChat.text !== '') {
+    if (currentChat?.text && currentChat.text !== "") {
       updateChatSome(+uuid, dataSources.value.length - 1, {
         text: `${currentChat.text}\n[${errorMessage}]`,
         error: false,
         loading: false,
-      })
-      return
+      });
+      return;
     }
 
     updateChat(+uuid, dataSources.value.length - 1, {
@@ -171,53 +176,49 @@ async function onConversation() {
       loading: false,
       conversationOptions: null,
       requestOptions: { prompt: message, options: { ...options } },
-    })
-    scrollToBottomIfAtBottom()
-  }
-  finally {
-    loading.value = false
+    });
+    scrollToBottomIfAtBottom();
+  } finally {
+    loading.value = false;
   }
 }
 
 async function onRegenerate(index: number) {
-  if (loading.value)
-    return
+  if (loading.value) return;
 
-  controller = new AbortController()
+  controller = new AbortController();
 
-  const { requestOptions } = dataSources.value[index]
+  const { requestOptions } = dataSources.value[index];
 
-  const message = requestOptions?.prompt ?? ''
+  const message = requestOptions?.prompt ?? "";
 
-  let options: Chat.ConversationRequest = {}
+  let options: Chat.ConversationRequest = {};
 
-  if (requestOptions.options)
-    options = { ...requestOptions.options }
+  if (requestOptions.options) options = { ...requestOptions.options };
 
-  loading.value = true
+  loading.value = true;
 
   updateChat(+uuid, index, {
     dateTime: new Date().toLocaleString(),
-    text: '',
+    text: "",
     inversion: false,
     error: false,
     loading: true,
     conversationOptions: null,
     requestOptions: { prompt: message, options: { ...options } },
-  })
+  });
 
   try {
-    await fetchChatAPIOnce(message, options)
-  }
-  catch (error: any) {
-    if (error.message === 'canceled') {
+    await fetchChatAPIOnce(message, options);
+  } catch (error: any) {
+    if (error.message === "canceled") {
       updateChatSome(+uuid, index, {
         loading: false,
-      })
-      return
+      });
+      return;
     }
 
-    const errorMessage = error?.message ?? t('common.wrong')
+    const errorMessage = error?.message ?? t("common.wrong");
 
     updateChat(+uuid, index, {
       dateTime: new Date().toLocaleString(),
@@ -227,104 +228,97 @@ async function onRegenerate(index: number) {
       loading: false,
       conversationOptions: null,
       requestOptions: { prompt: message, options: { ...options } },
-    })
-  }
-  finally {
-    loading.value = false
+    });
+  } finally {
+    loading.value = false;
   }
 }
 
 function handleExport() {
-  if (loading.value)
-    return
+  if (loading.value) return;
 
   const d = dialog.warning({
-    title: t('chat.exportImage'),
-    content: t('chat.exportImageConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
+    title: t("chat.exportImage"),
+    content: t("chat.exportImageConfirm"),
+    positiveText: t("common.yes"),
+    negativeText: t("common.no"),
     onPositiveClick: async () => {
       try {
-        d.loading = true
-        const ele = document.getElementById('image-wrapper')
+        d.loading = true;
+        const ele = document.getElementById("image-wrapper");
         const canvas = await html2canvas(ele as HTMLDivElement, {
           useCORS: true,
-        })
-        const imgUrl = canvas.toDataURL('image/png')
-        const tempLink = document.createElement('a')
-        tempLink.style.display = 'none'
-        tempLink.href = imgUrl
-        tempLink.setAttribute('download', 'chat-shot.png')
-        if (typeof tempLink.download === 'undefined')
-          tempLink.setAttribute('target', '_blank')
+        });
+        const imgUrl = canvas.toDataURL("image/png");
+        const tempLink = document.createElement("a");
+        tempLink.style.display = "none";
+        tempLink.href = imgUrl;
+        tempLink.setAttribute("download", "chat-shot.png");
+        if (typeof tempLink.download === "undefined")
+          tempLink.setAttribute("target", "_blank");
 
-        document.body.appendChild(tempLink)
-        tempLink.click()
-        document.body.removeChild(tempLink)
-        window.URL.revokeObjectURL(imgUrl)
-        d.loading = false
-        ms.success(t('chat.exportSuccess'))
-        Promise.resolve()
-      }
-      catch (error: any) {
-        ms.error(t('chat.exportFailed'))
-      }
-      finally {
-        d.loading = false
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        window.URL.revokeObjectURL(imgUrl);
+        d.loading = false;
+        ms.success(t("chat.exportSuccess"));
+        Promise.resolve();
+      } catch (error: any) {
+        ms.error(t("chat.exportFailed"));
+      } finally {
+        d.loading = false;
       }
     },
-  })
+  });
 }
 
 function handleDelete(index: number) {
-  if (loading.value)
-    return
+  if (loading.value) return;
 
   dialog.warning({
-    title: t('chat.deleteMessage'),
-    content: t('chat.deleteMessageConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
+    title: t("chat.deleteMessage"),
+    content: t("chat.deleteMessageConfirm"),
+    positiveText: t("common.yes"),
+    negativeText: t("common.no"),
     onPositiveClick: () => {
-      chatStore.deleteChatByUuid(+uuid, index)
+      chatStore.deleteChatByUuid(+uuid, index);
     },
-  })
+  });
 }
 
 function handleClear() {
-  if (loading.value)
-    return
+  if (loading.value) return;
 
   dialog.warning({
-    title: t('chat.clearChat'),
-    content: t('chat.clearChatConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
+    title: t("chat.clearChat"),
+    content: t("chat.clearChatConfirm"),
+    positiveText: t("common.yes"),
+    negativeText: t("common.no"),
     onPositiveClick: () => {
-      chatStore.clearChatByUuid(+uuid)
+      chatStore.clearChatByUuid(+uuid);
     },
-  })
+  });
 }
 
 function handleEnter(event: KeyboardEvent) {
   if (!isMobile.value) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      handleSubmit()
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSubmit();
     }
-  }
-  else {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      event.preventDefault()
-      handleSubmit()
+  } else {
+    if (event.key === "Enter" && event.ctrlKey) {
+      event.preventDefault();
+      handleSubmit();
     }
   }
 }
 
 function handleStop() {
   if (loading.value) {
-    controller.abort()
-    loading.value = false
+    controller.abort();
+    loading.value = false;
   }
 }
 
@@ -332,69 +326,64 @@ function handleStop() {
 // 搜索选项计算，这里使用value作为索引项，所以当出现重复value时渲染异常(多项同时出现选中效果)
 // 理想状态下其实应该是key作为索引项,但官方的renderOption会出现问题，所以就需要value反renderLabel实现
 const searchOptions = computed(() => {
-  if (prompt.value.startsWith('/')) {
+  if (prompt.value.startsWith("/")) {
     return promptTemplate.value
       .filter((item: { key: string }) =>
-        item.key.toLowerCase().includes(prompt.value.substring(1).toLowerCase()),
+        item.key.toLowerCase().includes(prompt.value.substring(1).toLowerCase())
       )
       .map((obj: { value: any }) => {
         return {
           label: obj.value,
           value: obj.value,
-        }
-      })
+        };
+      });
+  } else {
+    return [];
   }
-  else {
-    return []
-  }
-})
+});
 
 // value反渲染key
 const renderOption = (option: { label: string }) => {
   for (const i of promptTemplate.value) {
-    if (i.value === option.label)
-      return [i.key]
+    if (i.value === option.label) return [i.key];
   }
 
-  return []
-}
+  return [];
+};
 
 const placeholder = computed(() => {
-  if (isMobile.value)
-    return t('chat.placeholderMobile')
-  return t('chat.placeholder')
-})
+  if (isMobile.value) return t("chat.placeholderMobile");
+  return t("chat.placeholder");
+});
 
 const buttonDisabled = computed(() => {
-  return loading.value || !prompt.value || prompt.value.trim() === ''
-})
+  return loading.value || !prompt.value || prompt.value.trim() === "";
+});
 
 const footerClass = computed(() => {
-  let classes = ['p-4']
+  let classes = ["p-4"];
   if (isMobile.value) {
     classes = [
-      'sticky',
-      'left-0',
-      'bottom-0',
-      'right-0',
-      'p-2',
-      'pr-3',
-      'overflow-hidden',
-    ]
+      "sticky",
+      "left-0",
+      "bottom-0",
+      "right-0",
+      "p-2",
+      "pr-3",
+      "overflow-hidden",
+    ];
   }
-  return classes
-})
+  return classes;
+});
 
 onMounted(() => {
-  scrollToBottom()
-  if (inputRef.value && !isMobile.value)
-    inputRef.value?.focus()
-})
+  scrollToBottom();
+  if (inputRef.value && !isMobile.value) inputRef.value?.focus();
+});
 
 onUnmounted(() => {
-  if (loading.value)
-    controller.abort()
-})
+  if (loading.value) controller.abort();
+});
 </script>
 
 <template>
