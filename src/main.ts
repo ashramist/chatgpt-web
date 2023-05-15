@@ -5,19 +5,15 @@ import { setupAssets, setupScrollbarStyle } from './plugins'
 import { setupStore } from './store'
 import { setupRouter } from './router'
 
-async function bootstrap() {
-  const app = createApp(App)
-  setupAssets()
+const app = createApp(App)
+setupStore(app)
 
-  setupScrollbarStyle()
+setupAssets()
 
-  setupStore(app)
+setupScrollbarStyle()
 
-  setupI18n(app)
+setupI18n(app)
 
-  await setupRouter(app)
+setupRouter(app)
 
-  app.mount('#app')
-}
-
-bootstrap()
+app.mount('#app')

@@ -64,7 +64,7 @@ export function doChat(params = { prompt: '', parentMessageId: '', conversationI
   const token = getToken()
   if (!token) {
     removeToken()
-    router.replace('/')
+    router.replace('/login')
     return false
   }
   const coludWithToken = new Cloud({

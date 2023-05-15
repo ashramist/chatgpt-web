@@ -16,8 +16,8 @@ import bgPng2 from '@/assets/bg4-1.jpg'
 import { t } from '@/locales'
 import type { ResponseModel } from '@/api/index_laf'
 import { register, sendCodeByEmail } from '@/api/index_laf'
-import { useAuthStoreWithout } from '@/store/modules/auth'
 import { md5Encrypt } from '@/utils/crypto'
+import { setToken } from '@/store/modules/auth/helper'
 
 const mt = useMessage()
 const router = useRouter()
@@ -153,8 +153,7 @@ const doRegister = async () => {
     password: md5Encrypt(modelRef.value.password),
   })
   if (ok) {
-    const authStore = useAuthStoreWithout()
-    authStore.setToken(data.accessToken)
+    setToken(data.accessToken)
     mt.success(msg)
     router.replace('/')
   }

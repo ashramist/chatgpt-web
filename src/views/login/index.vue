@@ -8,7 +8,7 @@ import { t } from '@/locales'
 import type { ResponseModel } from '@/api/index_laf'
 import { login } from '@/api/index_laf'
 import { md5Encrypt } from '@/utils/crypto'
-import { useAuthStoreWithout } from '@/store/modules/auth'
+import { setToken } from '@/store/modules/auth/helper'
 
 const message = useMessage()
 const router = useRouter()
@@ -58,8 +58,7 @@ const doLogin = async () => {
     password: md5Encrypt(modelRef.value.password),
   })
   if (ok) {
-    const authStore = useAuthStoreWithout()
-    authStore.setToken(data.accessToken)
+    setToken(data.accessToken)
     message.success(msg)
     router.replace('/')
   }

@@ -1,8 +1,9 @@
 <script setup lang='ts'>
 import type { Ref } from "vue";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
+import { removeToken } from "@/store/modules/auth/helper";
 import {
   NAutoComplete,
   NButton,
@@ -26,6 +27,7 @@ import { doChat } from "@/api/index_laf";
 let controller = new AbortController();
 
 const route = useRoute();
+const router = useRouter();
 const dialog = useDialog();
 const ms = useMessage();
 
@@ -314,6 +316,15 @@ function handleEnter(event: KeyboardEvent) {
     }
   }
 }
+function handleLogout(event) {
+  try {
+    console.log('退出登錄')
+    removeToken();
+    router.replace("/login");
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 function handleStop() {
   if (loading.value) {
@@ -392,6 +403,7 @@ onUnmounted(() => {
       v-if="isMobile"
       :using-context="usingContext"
       @export="handleExport"
+      @logout="handleLogout"
       @toggle-using-context="toggleUsingContext"
     />
     <main class="flex-1 overflow-hidden">
