@@ -318,9 +318,17 @@ function handleEnter(event: KeyboardEvent) {
 }
 function handleLogout() {
   try {
-    console.log('退出登錄')
-    removeToken();
-    router.replace("/login");
+    dialog.warning({
+      title: "警告",
+      content: "你确定要退出登录么？",
+      positiveText: "确定",
+      negativeText: "不确定",
+      onPositiveClick: () => {
+        removeToken();
+        router.replace("/login");
+      },
+      onNegativeClick: () => {},
+    });
   } catch (error) {
     console.log(error);
   }
