@@ -1,7 +1,7 @@
 import { Cloud } from 'laf-client-sdk'
+import { useRouter } from 'vue-router'
 import { getToken, removeToken } from '@/store/modules/auth/helper'
 import { encrypt } from '@/utils/crypto/index'
-import { useRouter } from 'vue-router'
 const router = useRouter()
 const cloud = new Cloud({
   baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
