@@ -1,5 +1,8 @@
  本工程后端服务基于Laf 开发 
  前端工程基于 大佬 ChenZhaoYu 的 chatgpt-web工程 二次开发
+ # 在线体验
+   [H5在线体验](https://github.com/dengweijing/chatgpt-web/blob/master/src/assets/logo.svg)](https://uuuwmz-chatgpt.site.laf.run/)     
+
 # 访问流程说明
  建站说明，鉴于laf 分为海外版和国内版本，我们的chatgpt 是必须要走海外版服务器的。
  如果直接使用laf.dev 进行后端服务构建，如果是部署到微信公众号或者微信小程序，那么laf.dev 域名是没有进行备案的。所以我们采用代理的方式，在laf.dev上构建我们的后端服务，通过laf.run 国内站转发我们的接口服务，这样就避免了我们的域名备案问题，同时，我们的服务直接走laf.run 也可以避免直接访问laf.dev 带来的请求损耗。
@@ -10,9 +13,9 @@
 
  也就是说明我们的服务访问流程是如此 
 
-
- 请求：客户端  -> laf.run -> laf.dev 
- 返回：laf.dev -> laf.run -> 客户端 
+ 
+ 1. 请求：客户端  -> laf.run -> laf.dev 
+ 2. 返回：laf.dev -> laf.run -> 客户端 
 
 # 配置说明 
   1. 如果需要在此工程中进行二次开发，并且是基于laf ，可以配置文件中的.env.example 文件替换为.env 文件，配置自己的laf.run 构建的服务名称。
