@@ -1,5 +1,4 @@
 import type { Router } from 'vue-router'
-import { useAuthStoreWithout } from '@/store/modules/auth'
 import { getToken } from '@/store/modules/auth/helper'
 
 // 白名单

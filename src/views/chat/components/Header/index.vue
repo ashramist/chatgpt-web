@@ -10,7 +10,7 @@ interface Props {
 interface Emit {
   (ev: "export"): void;
   (ev: "toggleUsingContext"): void;
-  (ev: "logout"): vodi;
+  (ev: "logout"): void;
 }
 
 defineProps<Props>();

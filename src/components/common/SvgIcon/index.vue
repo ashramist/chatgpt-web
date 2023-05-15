@@ -3,7 +3,7 @@ import { computed, useAttrs } from "vue";
 import { Icon, IconifyIcon } from "@iconify/vue";
 
 interface Props {
-  icon?: string | IconifyIcon;
+  icon:string | IconifyIcon;
 }
 
 defineProps<Props>();

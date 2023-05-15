@@ -316,7 +316,7 @@ function handleEnter(event: KeyboardEvent) {
     }
   }
 }
-function handleLogout(event) {
+function handleLogout() {
   try {
     console.log('退出登錄')
     removeToken();
