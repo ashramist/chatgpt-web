@@ -4,7 +4,7 @@
    [h5在线体验](https://uuuwmz-chatgpt.site.laf.run/)
 
  # 微信扫码体验
-   ![image](https://github.com/dengweijing/chatgpt-web/src/assets/code.png)
+   ![image](https://github.com/dengweijing/chatgpt-web/tree/master/src/assets/code.png)
 #  为何需要增加注册功能 
    由于资源有限，所以这是为了避免一部分的用户滥用，所以保持不完全开放的方式提供给大家使用
 
