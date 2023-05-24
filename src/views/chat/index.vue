@@ -89,7 +89,7 @@ const fetchChatAPIOnce = async (
       loading: true,
       conversationOptions: {
         conversationId: data?.conversationId,
-        parentMessageId: data.id,
+        parentMessageId: data.parentMessageId,
       },
       requestOptions: { prompt: message, options: { ...options } },
     });
