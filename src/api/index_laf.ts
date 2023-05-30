@@ -9,7 +9,7 @@ const cloud = new Cloud({
   headers: {
     token: getToken() || '',
   },
-  timeout: 30 * 1000,
+
 })
 export interface ResponseModel {
   status: string
@@ -74,6 +74,7 @@ export function doChat(params = { prompt: '', parentMessageId: '', conversationI
     headers: {
       token: getToken() || '',
     },
+    timeout: 40 * 1000,
   })
   return coludWithToken.invokeFunction('proxy', { ...params, fc: encrypt('chat') })
 }
