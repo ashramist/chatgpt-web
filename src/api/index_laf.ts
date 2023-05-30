@@ -4,18 +4,19 @@ import { getToken, removeToken } from '@/store/modules/auth/helper'
 import { encrypt } from '@/utils/crypto/index'
 const router = useRouter()
 const cloud = new Cloud({
-  baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
-  getAccessToken: () => '', // 这里不需要授权，先填空
-  headers: {
-    token: getToken() || '',
-  },
+    baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
+    getAccessToken: () => '', // 这里不需要授权，先填空
+    headers: {
+        token: getToken() || '',
+    },
+    timeout: 30 * 1000,
 })
 export interface ResponseModel {
-  status: string
-  ok: boolean
-  message: string
-  data: any
-  requestId: string
+    status: string
+    ok: boolean
+    message: string
+    data: any
+    requestId: string
 }
 
 /**
@@ -23,7 +24,7 @@ export interface ResponseModel {
  * @param params 用户名和密码
  */
 export function login(params = { email: '', password: '' }) {
-  return cloud.invokeFunction('proxy', { ...params, fc: encrypt('login') })
+    return cloud.invokeFunction('proxy', { ...params, fc: encrypt('login') })
 }
 
 /**
@@ -31,14 +32,14 @@ export function login(params = { email: '', password: '' }) {
  * @param params 用户名和密码
  */
 export function sendCodeByEmail(params = { email: '' }) {
-  return cloud.invokeFunction('proxy', { ...params, fc: encrypt('sendEmail') })
+    return cloud.invokeFunction('proxy', { ...params, fc: encrypt('sendEmail') })
 }
 /**
  * 注册-云函数调用
  * @param params 用户名和密码
  */
 export function register(params = { email: '', password: '', code: '' }) {
-  return cloud.invokeFunction('proxy', { ...params, fc: encrypt('register') })
+    return cloud.invokeFunction('proxy', { ...params, fc: encrypt('register') })
 }
 
 /**
@@ -46,14 +47,14 @@ export function register(params = { email: '', password: '', code: '' }) {
  * @param params 用户名和密码
  */
 export function search(params = { prompt: '' }) {
-  return cloud.invokeFunction('proxy', { ...params, fc: encrypt('send') })
+    return cloud.invokeFunction('proxy', { ...params, fc: encrypt('send') })
 }
 
 /**
  * 历史记录获取
  */
 export function fetchHistoryLogList() {
-  return cloud.invokeFunction('proxy', { fc: encrypt('queryHistoryLogList') })
+    return cloud.invokeFunction('proxy', { fc: encrypt('queryHistoryLogList') })
 }
 
 /**
@@ -61,18 +62,18 @@ export function fetchHistoryLogList() {
  * @param prompt 客户端发送的聊天内容
  */
 export function doChat(params = { prompt: '', parentMessageId: '', conversationId: '' }) {
-  const token = getToken()
-  if (!token) {
-    removeToken()
-    router.replace('/login')
-    return false
-  }
-  const coludWithToken = new Cloud({
-    baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
-    getAccessToken: () => '', // 这里不需要授权，先填空
-    headers: {
-      token: getToken() || '',
-    },
-  })
-  return coludWithToken.invokeFunction('proxy', { ...params, fc: encrypt('chat') })
+    const token = getToken()
+    if (!token) {
+        removeToken()
+        router.replace('/login')
+        return false
+    }
+    const coludWithToken = new Cloud({
+        baseUrl: import.meta.env.VITE_APP_LAF_BASE_URL, // 这个地址可以在欢迎页面中的“服务地址”中找到
+        getAccessToken: () => '', // 这里不需要授权，先填空
+        headers: {
+            token: getToken() || '',
+        },
+    })
+    return coludWithToken.invokeFunction('proxy', { ...params, fc: encrypt('chat') })
 }
